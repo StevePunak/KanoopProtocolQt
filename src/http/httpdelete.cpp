@@ -6,6 +6,8 @@ void HttpDelete::execute()
 
     appendHeadersToRequest(&request);
 
+    configureSsl(&request);
+
     preDeleteHook();
 
     setReply(networkAccessManager()->deleteResource(request));

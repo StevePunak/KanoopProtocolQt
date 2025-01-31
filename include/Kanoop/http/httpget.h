@@ -14,7 +14,7 @@ public:
 protected:
     virtual void execute() override;
 
-    virtual void preGetHook() {}
+    virtual void preGetHook(QNetworkRequest*) {}
     virtual void postGetHook() {}
 
 private:

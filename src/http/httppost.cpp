@@ -6,6 +6,8 @@ void HttpPost::execute()
 
     appendHeadersToRequest(&request);
 
+    configureSsl(&request);
+
     prePostHook();
 
     setReply(networkAccessManager()->post(request, _postBody));

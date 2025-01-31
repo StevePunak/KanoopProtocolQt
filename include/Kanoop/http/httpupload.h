@@ -20,6 +20,9 @@ protected:
 private:
     QString _filename;
 
+    QHttpMultiPart* _multipart = nullptr;
+    QFile* _file = nullptr;
+
 signals:
     void uploadProgress(uint64_t sent, uint64_t total);
 };
