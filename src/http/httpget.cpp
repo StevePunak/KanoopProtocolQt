@@ -26,7 +26,9 @@ void HttpGet::execute()
 
     appendHeadersToRequest(&request);
 
-    preGetHook();
+    configureSsl(&request);
+
+    preGetHook(&request);
 
     setReply(networkAccessManager()->get(request));
 

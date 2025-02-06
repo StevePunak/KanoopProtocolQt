@@ -6,6 +6,8 @@ void HttpPut::execute()
 
     appendHeadersToRequest(&request);
 
+    configureSsl(&request);
+
     prePutHook();
 
     setReply(networkAccessManager()->put(request, _putBody));

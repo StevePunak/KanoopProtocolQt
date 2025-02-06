@@ -11,31 +11,33 @@ void HttpUpload::execute()
     {
         QNetworkRequest request(url());
 
+        configureSsl(&request);
+
         QFileInfo fileInfo(_filename);
         if(fileInfo.exists() == false) {
             throw CommonException(QString("File '%1' not found for upload").arg(_filename));
         }
 
-        QFile file(_filename, this);
+        _file = new QFile(_filename, this);
 
         QHttpPart dispositionPart;
         dispositionPart.setHeader(
                     QNetworkRequest::ContentDispositionHeader,
                     QString("form-data; name=\"file\"; filename=\"%1\"").arg(fileInfo.fileName()));
 
-        QHttpMultiPart multipart(QHttpMultiPart::FormDataType, this);
+        _multipart = new QHttpMultiPart(QHttpMultiPart::FormDataType, this);
 
-        if(file.open(QIODevice::ReadOnly) == false) {
+        if(_file->open(QIODevice::ReadOnly) == false) {
             throw CommonException(QString("Failed to open file '%1'").arg(_filename));
         }
 
-        dispositionPart.setBodyDevice(&file);
+        dispositionPart.setBodyDevice(_file);
 
-        multipart.append(dispositionPart);
+        _multipart->append(dispositionPart);
 
         // SSL TODO
 
-        QNetworkReply* reply = networkAccessManager()->post(request, &multipart);
+        QNetworkReply* reply = networkAccessManager()->post(request, _multipart);
         connect(reply, &QNetworkReply::uploadProgress, this, &HttpUpload::uploadProgress);
         setReply(reply);
     }
