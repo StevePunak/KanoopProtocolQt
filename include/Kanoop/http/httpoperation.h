@@ -33,6 +33,7 @@ public:
     QNetworkReply::NetworkError networkError() const { return _networkError; }
     QString reasonPhrase() const { return _reasonPhrase; }
     QByteArray responseBody() const { return _responseBody; }
+    int statusCode() const { return _statusCode; }
     TimeSpan duration() const { return _duration; }
 
     bool isHttps() const;
@@ -40,6 +41,7 @@ public:
 protected:
     virtual void execute() = 0;
     virtual void postReplyHook(QNetworkReply*) {}
+    void setUrl(const QString& value) { _url = value; }
 
     QNetworkAccessManager* networkAccessManager();
 
@@ -57,7 +59,7 @@ private:
     HttpCustomHeaders _customHeaders;
     QList<QNetworkCookie> _requestCookies;
 
-    int _statusCode;
+    int _statusCode = 0;
     QNetworkReply::NetworkError _networkError = QNetworkReply::UnknownServerError;
     QString _reasonPhrase;
     QByteArray _responseBody;

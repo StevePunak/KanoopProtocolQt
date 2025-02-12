@@ -20,6 +20,7 @@ void HttpGet::execute()
             query.addQueryItem(it.key(), it.value());
         }
         url.setQuery(query);
+        setUrl(url.toString(QUrl::PrettyDecoded));
     }
 
     QNetworkRequest request(url);
