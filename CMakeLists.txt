@@ -13,7 +13,7 @@ set(CMAKE_AUTOUIC ON)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-set(KANOOP_QTGUI_VERSION "1.1.9")
+set(KANOOP_QTGUI_VERSION "1.2.1")
 
 file(GLOB_RECURSE PROJ_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
@@ -39,7 +39,12 @@ get_directory_property(PARENT_DIR PARENT_DIRECTORY)
 target_include_directories(${PROJ} PRIVATE ${PARENT_DIR}/KanoopCommon/include)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Mqtt SerialBus)
-target_link_libraries(${PROJ} PRIVATE PRIVATE Qt6::Core Qt6::Mqtt Qt6::SerialBus KanoopCommon)
+target_link_libraries(${PROJ} PRIVATE
+    Qt6::Core
+    Qt6::Mqtt
+    Qt6::SerialBus
+    KanoopCommonQt
+)
 
 add_compile_definitions(KANOOP_PROTOCOLQT_LIBRARY)
 add_compile_definitions(QT_DEPRECATED_WARNINGS)
