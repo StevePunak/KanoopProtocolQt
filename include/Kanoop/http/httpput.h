@@ -8,11 +8,11 @@ class HttpPut : public HttpOperation
     Q_OBJECT
 public:
     HttpPut(const QString& url, const QByteArray& putBody) :
-        HttpOperation(url),
+        HttpOperation(url, Put),
         _putBody(putBody) {}
 
     HttpPut(const QString& url, const ISerializableToJson& putBody) :
-        HttpOperation(url),
+        HttpOperation(url, Put),
         _putBody(putBody.serializeToJson()), _isJson(true) {}
 
 protected:

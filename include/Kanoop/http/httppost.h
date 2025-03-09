@@ -8,11 +8,11 @@ class HttpPost : public HttpOperation
     Q_OBJECT
 public:
     HttpPost(const QString& url, const QByteArray& postBody) :
-        HttpOperation(url),
+        HttpOperation(url, Post),
         _postBody(postBody) {}
 
     HttpPost(const QString& url, const ISerializableToJson& postBody) :
-        HttpOperation(url),
+        HttpOperation(url, Post),
         _postBody(postBody.serializeToJson()), _isJson(true) {}
 
     QByteArray requestBody() const { return _postBody; }

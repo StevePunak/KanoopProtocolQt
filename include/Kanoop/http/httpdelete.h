@@ -8,7 +8,7 @@ class HttpDelete : public HttpOperation
     Q_OBJECT
 public:
     HttpDelete(const QString& url) :
-        HttpOperation(url) {}
+        HttpOperation(url, Delete) {}
 
 protected:
     virtual void execute() override;

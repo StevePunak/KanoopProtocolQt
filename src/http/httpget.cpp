@@ -5,7 +5,7 @@
 
 
 HttpGet::HttpGet(const QString& url) :
-    HttpOperation(url)
+    HttpOperation(url, Get)
 {
 }
 

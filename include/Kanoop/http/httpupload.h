@@ -8,7 +8,7 @@ class HttpUpload : public HttpOperation
     Q_OBJECT
 public:
     HttpUpload(const QString& url, const QString& filename = QString()) :
-        HttpOperation(url),
+        HttpOperation(url, MultipartUpload),
         _filename(filename) {}
 
     QString filename() const { return _filename; }

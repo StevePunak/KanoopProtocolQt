@@ -10,8 +10,21 @@ class QNetworkAccessManager;
 class HttpOperation : public AbstractThreadClass
 {
     Q_OBJECT
+public:
+    enum RequestMethod {
+        UnknownMethod   = 0x0000,
+        Get             = 0x0001,
+        Put             = 0x0002,
+        Delete          = 0x0004,
+        Post            = 0x0008,
+        Head            = 0x0010,
+        Patch           = 0x0040,
+        MultipartUpload = 0x1000,
+    };
+
 protected:
-    HttpOperation(const QString& url);
+    HttpOperation(const QString& url, RequestMethod method/* = UnknownMethod*/);
+
 public:
     virtual ~HttpOperation();
 
@@ -36,7 +49,11 @@ public:
     int statusCode() const { return _statusCode; }
     TimeSpan duration() const { return _duration; }
 
+    QString getRequestMethodString() const { return _RequestMethodToStringMap.getString(_method); }
+
     bool isHttps() const;
+
+    static QString getRequestMethodString(RequestMethod method) { return _RequestMethodToStringMap.getString(method); }
 
 protected:
     virtual void execute() = 0;
@@ -55,6 +72,8 @@ private:
     virtual void threadFinished() override;
 
     QString _url;
+    RequestMethod _method;
+
     HttpKnownHeaders _headers;
     HttpCustomHeaders _customHeaders;
     QList<QNetworkCookie> _requestCookies;
@@ -71,6 +90,24 @@ private:
     TimeSpan _duration;
 
     QNetworkAccessManager* _networkAccessManager = nullptr;
+
+    class RequestMethodToStringMap : public KANOOP::EnumToStringMap<RequestMethod>
+    {
+    public:
+        RequestMethodToStringMap()
+        {
+            insert(UnknownMethod,   "UnknownMethod");
+            insert(Get,             "GET");
+            insert(Put,             "PUT");
+            insert(Delete,          "DELETE");
+            insert(Post,            "POST");
+            insert(Head,            "HEAD");
+            insert(Patch,           "PATCH");
+            insert(MultipartUpload, "UPLOAD");
+        }
+    };
+
+    static const RequestMethodToStringMap _RequestMethodToStringMap;
 
 signals:
     void operationComplete();

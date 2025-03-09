@@ -5,9 +5,10 @@
 
 #include <Kanoop/commonexception.h>
 
+const HttpOperation::RequestMethodToStringMap HttpOperation::_RequestMethodToStringMap;
 
-HttpOperation::HttpOperation(const QString& url) :
-    _url(url)
+HttpOperation::HttpOperation(const QString& url, RequestMethod method) :
+    _url(url), _method(method)
 {
 }
 
