@@ -67,9 +67,10 @@ protected:
     void appendHeadersToRequest(QNetworkRequest* request);
     void configureSsl(QNetworkRequest* request);
 
+    virtual void threadFinished() override;
+
 private:
     virtual void threadStarted() override;
-    virtual void threadFinished() override;
 
     QString _url;
     RequestMethod _method;
