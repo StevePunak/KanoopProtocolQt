@@ -15,7 +15,7 @@ protected:
     virtual void execute() override;
 
     virtual void preGetHook(QNetworkRequest*) {}
-    virtual void postGetHook() {}
+    virtual void postGetHook(QNetworkReply* reply) { Q_UNUSED(reply) }
 
 private:
     QMap<QString, QString> _parameters;

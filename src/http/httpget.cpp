@@ -31,9 +31,10 @@ void HttpGet::execute()
 
     preGetHook(&request);
 
-    setReply(networkAccessManager()->get(request));
+    QNetworkReply* reply = networkAccessManager()->get(request);
+    setReply(reply);
 
-    postGetHook();
+    postGetHook(reply);
 }
 
 
