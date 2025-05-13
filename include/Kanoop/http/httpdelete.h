@@ -3,7 +3,7 @@
 #include <Kanoop/http/httpoperation.h>
 #include <Kanoop/serialization/iserializabletojson.h>
 
-class HttpDelete : public HttpOperation
+class LIBKANOOPPROTOCOL_EXPORT HttpDelete : public HttpOperation
 {
     Q_OBJECT
 public:

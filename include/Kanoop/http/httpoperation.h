@@ -5,9 +5,10 @@
 
 #include <QNetworkCookie>
 #include <QNetworkReply>
+#include <Kanoop/kanoopprotocol.h>
 
 class QNetworkAccessManager;
-class HttpOperation : public AbstractThreadClass
+class LIBKANOOPPROTOCOL_EXPORT HttpOperation : public AbstractThreadClass
 {
     Q_OBJECT
 public:
