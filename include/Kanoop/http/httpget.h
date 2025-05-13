@@ -1,8 +1,9 @@
 #ifndef HTTPGET_H
 #define HTTPGET_H
+#include <Kanoop/kanoopprotocol.h>
 #include <Kanoop/http/httpoperation.h>
 
-class HttpGet : public HttpOperation
+class LIBKANOOPPROTOCOL_EXPORT HttpGet : public HttpOperation
 {
     Q_OBJECT
 public:

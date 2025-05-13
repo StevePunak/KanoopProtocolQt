@@ -3,7 +3,7 @@
 #include <Kanoop/http/httpoperation.h>
 #include <Kanoop/serialization/iserializabletojson.h>
 
-class HttpUpload : public HttpOperation
+class LIBKANOOPPROTOCOL_EXPORT HttpUpload : public HttpOperation
 {
     Q_OBJECT
 public:

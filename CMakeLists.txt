@@ -46,7 +46,7 @@ target_link_libraries(${PROJ} PRIVATE
     KanoopCommonQt
 )
 
-add_compile_definitions(KANOOP_PROTOCOLQT_LIBRARY)
+add_compile_definitions(KANOOP_PROTOCOL_LIBRARY)
 add_compile_definitions(QT_DEPRECATED_WARNINGS)
 add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x060000)  # Disables all the APIs deprecated before Qt 6.0.0
 

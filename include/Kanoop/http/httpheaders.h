@@ -3,13 +3,13 @@
 
 #include <QMap>
 #include <QNetworkRequest>
+#include <Kanoop/kanoopprotocol.h>
 
-
-class HttpCustomHeaders : public QMap<QString, QByteArray>
+class LIBKANOOPPROTOCOL_EXPORT HttpCustomHeaders : public QMap<QString, QByteArray>
 {
 };
 
-class HttpKnownHeaders : public QMap<QNetworkRequest::KnownHeaders, QByteArray>
+class LIBKANOOPPROTOCOL_EXPORT HttpKnownHeaders : public QMap<QNetworkRequest::KnownHeaders, QByteArray>
 {
 };
 
