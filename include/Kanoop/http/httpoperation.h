@@ -36,6 +36,8 @@ public:
     void appendHeader(QNetworkRequest::KnownHeaders type, const QByteArray& value) { _headers.insert(type, value); }
     void appendHeader(const QString& headerName, const QByteArray& value) { _customHeaders.insert(headerName, value); }
 
+    void abortOperation();
+
     QList<QNetworkCookie> requestCookies() const { return _requestCookies; }
     void setRequestCookies(const QList<QNetworkCookie>& value) { _requestCookies = value; }
 
@@ -92,6 +94,7 @@ private:
     TimeSpan _duration;
 
     QNetworkAccessManager* _networkAccessManager = nullptr;
+    QNetworkReply* _reply = nullptr;
 
     class RequestMethodToStringMap : public KANOOP::EnumToStringMap<RequestMethod>
     {

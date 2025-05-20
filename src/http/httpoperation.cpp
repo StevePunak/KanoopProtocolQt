@@ -19,6 +19,15 @@ HttpOperation::~HttpOperation()
     }
 }
 
+void HttpOperation::abortOperation()
+{
+    if(_reply == nullptr) {
+        logText(LVL_ERROR, QString("%1: Tried to abort with no operation in progress").arg(objectName()));
+        return;
+    }
+    _reply->abort();
+}
+
 QNetworkAccessManager* HttpOperation::networkAccessManager()
 {
     if(_networkAccessManager == nullptr) {
@@ -29,7 +38,11 @@ QNetworkAccessManager* HttpOperation::networkAccessManager()
 
 void HttpOperation::setReply(QNetworkReply* reply)
 {
-    connect(reply, &QNetworkReply::finished, this, &HttpOperation::onReplyFinished);
+    if(_reply != nullptr) {
+        logText(LVL_ERROR, QString("%1: Set reply while one was already set").arg(objectName()));
+    }
+    _reply = reply;
+    connect(_reply, &QNetworkReply::finished, this, &HttpOperation::onReplyFinished);
 }
 
 void HttpOperation::appendHeadersToRequest(QNetworkRequest* request)
@@ -85,7 +98,11 @@ void HttpOperation::threadFinished()
 void HttpOperation::onReplyFinished()
 {
     QNetworkReply* reply = dynamic_cast<QNetworkReply*>(sender());
-    assert(reply);
+    Q_ASSERT(reply);
+
+    if(_reply != reply) {
+        logText(LVL_ERROR, QString("%1: replies are not equal when finished").arg(objectName()));
+    }
 
     postReplyHook(reply);
 
