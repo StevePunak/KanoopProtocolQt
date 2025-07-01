@@ -31,6 +31,7 @@ void HttpGet::execute()
 
     preGetHook(&request);
 
+    request.setTransferTimeout(transferTimeout().totalMilliseconds());
     QNetworkReply* reply = networkAccessManager()->get(request);
     setReply(reply);
 

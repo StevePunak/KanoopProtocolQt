@@ -46,6 +46,9 @@ public:
     bool isVerifyPeer() const { return _verifyPeer; }
     void setVerifyPeer(bool value) { _verifyPeer = value; }
 
+    TimeSpan transferTimeout() const { return _transferTimeout; }
+    void setTransferTimeout(const TimeSpan& value) { _transferTimeout = value; }
+
     QNetworkReply::NetworkError networkError() const { return _networkError; }
     QString reasonPhrase() const { return _reasonPhrase; }
     QByteArray responseBody() const { return _responseBody; }
@@ -91,6 +94,7 @@ private:
     bool _verifyPeer = true;
 
     QDateTime _operationStartTime;
+    TimeSpan _transferTimeout = TimeSpan::fromMilliseconds(QNetworkRequest::DefaultTransferTimeoutConstant);
     TimeSpan _duration;
 
     QNetworkAccessManager* _networkAccessManager = nullptr;

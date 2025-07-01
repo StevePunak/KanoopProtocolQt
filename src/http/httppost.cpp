@@ -10,6 +10,8 @@ void HttpPost::execute()
 
     prePostHook();
 
+    request.setTransferTimeout(transferTimeout().totalMilliseconds());
+
     setReply(networkAccessManager()->post(request, _postBody));
 
     postPostHook();

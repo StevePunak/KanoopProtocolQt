@@ -10,6 +10,8 @@ void HttpPut::execute()
 
     prePutHook();
 
+    request.setTransferTimeout(transferTimeout().totalMilliseconds());
+
     setReply(networkAccessManager()->put(request, _putBody));
 
     postPutHook();
