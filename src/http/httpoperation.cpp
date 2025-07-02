@@ -2,6 +2,7 @@
 #include "httpstatuscodes.h"
 
 #include <QNetworkAccessManager>
+#include <QTimer>
 
 #include <Kanoop/commonexception.h>
 
@@ -25,7 +26,16 @@ void HttpOperation::abortOperation()
         logText(LVL_ERROR, QString("%1: Tried to abort with no operation in progress").arg(objectName()));
         return;
     }
-    _reply->abort();
+    if(QThread::currentThread() != thread()) {
+        QTimer::singleShot(0, _reply, &QNetworkReply::abort);
+        if(waitForCompletion(TimeSpan::fromSeconds(3)) == false) {
+            logText(LVL_ERROR, QString("%1: Thread never completed after abort").arg(objectName()));
+        }
+    }
+    else {
+        _reply->abort();
+    }
+    _reply = nullptr;
 }
 
 QNetworkAccessManager* HttpOperation::networkAccessManager()
