@@ -8,6 +8,11 @@
 
 const HttpOperation::RequestMethodToStringMap HttpOperation::_RequestMethodToStringMap;
 
+const QList<QSslError::SslError> HttpOperation::SelfSignedCertificateErrors = {
+    QSslError::SelfSignedCertificateInChain,
+    QSslError::SelfSignedCertificate,
+};
+
 HttpOperation::HttpOperation(const QString& url, RequestMethod method) :
     _url(url), _method(method)
 {
@@ -38,6 +43,18 @@ void HttpOperation::abortOperation()
     _reply = nullptr;
 }
 
+bool HttpOperation::isSelfSignedCertificateErrorIgnored() const
+{
+    return _ignoreSslErrors.contains(SelfSignedCertificateErrors.first());
+}
+
+void HttpOperation::ignoreSelfSignedSertificate()
+{
+    if(_ignoreSslErrors.contains(SelfSignedCertificateErrors.first()) == false) {
+        _ignoreSslErrors.append(SelfSignedCertificateErrors);
+    }
+}
+
 QNetworkAccessManager* HttpOperation::networkAccessManager()
 {
     if(_networkAccessManager == nullptr) {
@@ -52,6 +69,8 @@ void HttpOperation::setReply(QNetworkReply* reply)
         logText(LVL_ERROR, QString("%1: Set reply while one was already set").arg(objectName()));
     }
     _reply = reply;
+
+    connect(_reply, &QNetworkReply::sslErrors, this, &HttpOperation::onSslErrors);
     connect(_reply, &QNetworkReply::finished, this, &HttpOperation::onReplyFinished);
 }
 
@@ -137,6 +156,25 @@ void HttpOperation::onReplyFinished()
     }
 
     finishAndStop(success, message);
+}
+
+void HttpOperation::onSslErrors(const QList<QSslError>& errors)
+{
+    bool ignore = errors.count() > 0;
+    QList<QSslError> expectedErrors;
+    for(const QSslError& error : errors) {
+        if(_ignoreSslErrors.contains(error.error())) {
+            expectedErrors.append(error);
+        }
+        else {
+            ignore = false;
+            break;
+        }
+    }
+
+    if(ignore == true) {
+        _reply->ignoreSslErrors(expectedErrors);
+    }
 }
 
 void HttpOperation::onReplyError(QNetworkReply::NetworkError error)

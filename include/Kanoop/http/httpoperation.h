@@ -46,6 +46,9 @@ public:
     bool isVerifyPeer() const { return _verifyPeer; }
     void setVerifyPeer(bool value) { _verifyPeer = value; }
 
+    bool isSelfSignedCertificateErrorIgnored() const;
+    void ignoreSelfSignedSertificate();
+
     TimeSpan transferTimeout() const { return _transferTimeout; }
     void setTransferTimeout(const TimeSpan& value) { _transferTimeout = value; }
 
@@ -91,6 +94,8 @@ private:
     QByteArray _responseBody;
     QList<QNetworkCookie> _responseCookies;
 
+    QList<QSslError::SslError> _ignoreSslErrors;
+
     bool _verifyPeer = true;
 
     QDateTime _operationStartTime;
@@ -117,12 +122,14 @@ private:
     };
 
     static const RequestMethodToStringMap _RequestMethodToStringMap;
+    static const QList<QSslError::SslError> SelfSignedCertificateErrors;
 
 signals:
     void operationComplete();
 
 protected slots:
     void onReplyFinished();
+    void onSslErrors(const QList<QSslError> &errors);
     void onReplyError(QNetworkReply::NetworkError error);
 };
 
