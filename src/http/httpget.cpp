@@ -9,6 +9,10 @@ HttpGet::HttpGet(const QString& url) :
 {
 }
 
+void HttpGet::addParameter(const QString& key, const QString& value)
+{
+    _parameters.append(KeyValuePair(key, value));
+}
 
 void HttpGet::execute()
 {
@@ -16,8 +20,8 @@ void HttpGet::execute()
 
     if(_parameters.count() > 0) {
         QUrlQuery query;
-        for(auto it = _parameters.constBegin();it !=_parameters.constEnd();it++) {
-            query.addQueryItem(it.key(), it.value());
+        for(const KeyValuePair& kvp : _parameters) {
+            query.addQueryItem(kvp.first, kvp.second);
         }
         url.setQuery(query);
         setUrl(url.toString(QUrl::PrettyDecoded));

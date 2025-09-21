@@ -9,8 +9,7 @@ class LIBKANOOPPROTOCOL_EXPORT HttpGet : public HttpOperation
 public:
     HttpGet(const QString& url);
 
-    void addParameter(const QString& key, const QString& value) { _parameters.insert(key, value); }
-    void removeParameter(const QString& key) { _parameters.remove(key); }
+    void addParameter(const QString& key, const QString& value);
 
 protected:
     virtual void execute() override;
@@ -19,7 +18,17 @@ protected:
     virtual void postGetHook(QNetworkReply* reply) { Q_UNUSED(reply) }
 
 private:
-    QMap<QString, QString> _parameters;
+    class KeyValuePair : public QPair<QString, QString>
+    {
+    public:
+        KeyValuePair() {}
+        KeyValuePair(const QString& key, const QString& value)
+        {
+            first = key;
+            second = value;
+        }
+    };
+    QList<KeyValuePair> _parameters;
 };
 
 #endif // HTTPGET_H
