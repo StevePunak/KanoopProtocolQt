@@ -36,10 +36,32 @@ void HttpGet::execute()
     preGetHook(&request);
 
     request.setTransferTimeout(transferTimeout().totalMilliseconds());
+
     QNetworkReply* reply = networkAccessManager()->get(request);
+    connect(reply, &QNetworkReply::downloadProgress, this, &HttpGet::downloadProgress);
     setReply(reply);
+    if(_streamingRead) {
+        connect(reply, &QNetworkReply::readyRead, this, &HttpGet::onStreamingReadyRead);
+    }
 
     postGetHook(reply);
+}
+
+void HttpGet::postReplyHook(QNetworkReply* reply)
+{
+    if(_streamingRead) {
+        QByteArray data = reply->readAll();
+        emit dataAvailable(data);
+    }
+}
+
+void HttpGet::onStreamingReadyRead()
+{
+    QNetworkReply* reply = qobject_cast<QNetworkReply*>(sender());
+    if(reply != nullptr) {
+        QByteArray data = reply->readAll();
+        emit dataAvailable(data);
+    }
 }
 
 
