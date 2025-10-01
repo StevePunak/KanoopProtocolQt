@@ -7,7 +7,7 @@ class LIBKANOOPPROTOCOL_EXPORT HttpPut : public HttpOperation
 {
     Q_OBJECT
 public:
-    HttpPut(const QString& url, const QByteArray& putBody) :
+    HttpPut(const QString& url, const QByteArray& putBody = QByteArray()) :
         HttpOperation(url, Put),
         _putBody(putBody) {}
 

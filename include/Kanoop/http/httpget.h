@@ -32,16 +32,6 @@ protected:
     virtual void postReplyHook(QNetworkReply*reply) override;
 
 private:
-    class KeyValuePair : public QPair<QString, QString>
-    {
-    public:
-        KeyValuePair() {}
-        KeyValuePair(const QString& key, const QString& value)
-        {
-            first = key;
-            second = value;
-        }
-    };
     QList<KeyValuePair> _parameters;
     bool _streamingRead = false;
 

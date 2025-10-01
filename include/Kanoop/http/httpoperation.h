@@ -65,6 +65,17 @@ public:
     static QString getRequestMethodString(RequestMethod method) { return _RequestMethodToStringMap.getString(method); }
 
 protected:
+    class KeyValuePair : public QPair<QString, QString>
+    {
+    public:
+        KeyValuePair() {}
+        KeyValuePair(const QString& key, const QString& value)
+        {
+            first = key;
+            second = value;
+        }
+    };
+
     virtual void execute() = 0;
     virtual void postReplyHook(QNetworkReply*) {}
     void setUrl(const QString& value) { _url = value; }

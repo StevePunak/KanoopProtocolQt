@@ -2,7 +2,10 @@
 
 void HttpPut::execute()
 {
-    QNetworkRequest request(url());
+    QUrl url = HttpOperation::url();
+    setUrl(url.toString(QUrl::PrettyDecoded));
+
+    QNetworkRequest request(url);
 
     appendHeadersToRequest(&request);
 
