@@ -14,11 +14,14 @@ public:
     QString filename() const { return _filename; }
     void setFilename(const QString& value) { _filename = value; }
 
+    void addParameter(const QString& key, const QString& value);
+
 protected:
     virtual void execute() override;
 
 private:
     QString _filename;
+    QList<KeyValuePair> _parameters;
 
     QHttpMultiPart* _multipart = nullptr;
     QFile* _file = nullptr;

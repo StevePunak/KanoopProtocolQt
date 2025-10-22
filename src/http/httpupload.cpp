@@ -2,14 +2,31 @@
 
 #include <QFileInfo>
 #include <QHttpPart>
+#include <QUrlQuery>
 
 #include <Kanoop/commonexception.h>
+
+void HttpUpload::addParameter(const QString& key, const QString& value)
+{
+    _parameters.append(KeyValuePair(key, value));
+}
 
 void HttpUpload::execute()
 {
     try
     {
-        QNetworkRequest request(url());
+        QUrl url = HttpOperation::url();
+
+        if(_parameters.count() > 0) {
+            QUrlQuery query;
+            for(const KeyValuePair& kvp : _parameters) {
+                query.addQueryItem(kvp.first, kvp.second);
+            }
+            url.setQuery(query);
+            setUrl(url.toString(QUrl::PrettyDecoded));
+        }
+
+        QNetworkRequest request(url);
 
         configureSsl(&request);
 
