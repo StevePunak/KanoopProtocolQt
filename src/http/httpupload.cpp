@@ -28,6 +28,7 @@ void HttpUpload::execute()
 
         QNetworkRequest request(url);
 
+        appendHeadersToRequest(&request);
         configureSsl(&request);
 
         QFileInfo fileInfo(_filename);
@@ -51,8 +52,6 @@ void HttpUpload::execute()
         dispositionPart.setBodyDevice(_file);
 
         _multipart->append(dispositionPart);
-
-        // SSL TODO
 
         QNetworkReply* reply = networkAccessManager()->post(request, _multipart);
         connect(reply, &QNetworkReply::uploadProgress, this, &HttpUpload::uploadProgress);
