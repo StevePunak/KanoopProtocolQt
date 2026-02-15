@@ -14,6 +14,7 @@ const QList<QSslError::SslError> HttpOperation::SelfSignedCertificateErrors = {
 };
 
 HttpOperation::HttpOperation(const QString& url, RequestMethod method) :
+    AbstractThreadClass("http-op"),
     _url(url), _method(method)
 {
 }
