@@ -15,6 +15,8 @@ public:
         HttpOperation(url, Put),
         _putBody(putBody.serializeToJson()), _isJson(true) {}
 
+    QByteArray putBody() const { return _putBody; }
+
 protected:
     virtual void execute() override;
 

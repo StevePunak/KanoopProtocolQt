@@ -11,7 +11,8 @@ void HttpDelete::execute()
     preDeleteHook();
 
     request.setTransferTimeout(transferTimeout().totalMilliseconds());
-    setReply(networkAccessManager()->deleteResource(request));
+
+    setReply(networkAccessManager()->sendCustomRequest(request, "DELETE", _postBody));
 
     postDeleteHook();
 }
