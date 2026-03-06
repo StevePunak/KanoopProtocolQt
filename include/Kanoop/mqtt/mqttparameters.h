@@ -3,8 +3,9 @@
 #include <QString>
 #include <QMqttClient>
 #include <QSslKey>
+#include <Kanoop/kanoopprotocol.h>
 
-class MqttParameters
+class LIBKANOOPPROTOCOL_EXPORT MqttParameters
 {
 public:
     MqttParameters() {}

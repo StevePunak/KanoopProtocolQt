@@ -5,9 +5,10 @@
 #include <Kanoop/timespan.h>
 #include <Kanoop/utility/loggingbaseclass.h>
 #include <Kanoop/mqtt/mqttparameters.h>
+#include <Kanoop/kanoopprotocol.h>
 
-class MqttClient : public QObject,
-                   public LoggingBaseClass
+class LIBKANOOPPROTOCOL_EXPORT MqttClient : public QObject,
+                                            public LoggingBaseClass
 {
     Q_OBJECT
 public:
