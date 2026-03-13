@@ -47,7 +47,7 @@ public:
     void setVerifyPeer(bool value) { _verifyPeer = value; }
 
     bool isSelfSignedCertificateErrorIgnored() const;
-    void ignoreSelfSignedSertificate();
+    void ignoreSelfSignedCertificate();
 
     TimeSpan transferTimeout() const { return _transferTimeout; }
     void setTransferTimeout(const TimeSpan& value) { _transferTimeout = value; }

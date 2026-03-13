@@ -60,5 +60,6 @@ void HttpUpload::execute()
     catch (CommonException& e)
     {
         Log::logText(LVL_ERROR, QString("UPLOAD FAILED: %1").arg(e.message()));
+        finishAndStop(false, e.message());
     }
 }

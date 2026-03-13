@@ -57,7 +57,6 @@ private:
     QMqttClient::ProtocolVersion _protocolVersion = QMqttClient::MQTT_5_0;
     bool _useSsl = false;
     bool _verifyPeer = false;
-    QSslConfiguration _configuration;
 
     QSslCertificate _clientCertificate;
     QSslCertificate _caCertificate;
