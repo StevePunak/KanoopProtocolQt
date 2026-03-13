@@ -49,7 +49,7 @@ bool HttpOperation::isSelfSignedCertificateErrorIgnored() const
     return _ignoreSslErrors.contains(SelfSignedCertificateErrors.first());
 }
 
-void HttpOperation::ignoreSelfSignedSertificate()
+void HttpOperation::ignoreSelfSignedCertificate()
 {
     if(_ignoreSslErrors.contains(SelfSignedCertificateErrors.first()) == false) {
         _ignoreSslErrors.append(SelfSignedCertificateErrors);
@@ -140,9 +140,11 @@ void HttpOperation::onReplyFinished()
         QString name = pair.first;
         QByteArray payload = pair.second;
         if(QString::compare(name, "set-cookie", Qt::CaseInsensitive) == 0) {
-            _responseCookies = QNetworkCookie::parseCookies(payload);
+            _responseCookies.append(QNetworkCookie::parseCookies(payload));
         }
     }
+
+    _duration = TimeSpan::fromMilliseconds(_operationStartTime.msecsTo(QDateTime::currentDateTimeUtc()));
 
     _networkError = reply->error();
     bool success = _networkError == QNetworkReply::NoError;

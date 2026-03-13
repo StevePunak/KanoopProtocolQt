@@ -7,6 +7,10 @@ void HttpPut::execute()
 
     QNetworkRequest request(url);
 
+    if(_isJson) {
+        request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    }
+
     appendHeadersToRequest(&request);
 
     configureSsl(&request);

@@ -30,6 +30,9 @@ void MqttClient::start()
 {
     try
     {
+        if(_client != nullptr) {
+            delete _client;
+        }
         _client = new QMqttClient;
         connect(_client, &QMqttClient::connected, this, &MqttClient::onClientConnected);
         connect(_client, &QMqttClient::disconnected, this, &MqttClient::onDisconnected);
@@ -134,7 +137,7 @@ void MqttClient::onClientConnected()
 
 void MqttClient::onDisconnected()
 {
-    logText(LVL_DEBUG, "Client connected");
+    logText(LVL_DEBUG, "Client disconnected");
     _connected = false;
     disconnected();
     emit clientDisconnected();
