@@ -18,3 +18,4 @@ endfunction()
 
 add_protocol_test(tst_mqtt_parameters)
 add_protocol_test(tst_http)
+add_protocol_test(tst_http_integration)
