@@ -45,7 +45,17 @@ jobs:
         uses: jurplel/install-qt-action@v4
         with:
           version: ${{ env.QT_VERSION }}
-          modules: qtwebsockets qtmqtt qtserialbus
+          modules: qtwebsockets qtserialbus
+
+      - name: Build Qt6 MQTT from source
+        run: |
+          git clone https://github.com/qt/qtmqtt.git
+          cd qtmqtt
+          git checkout ${{ env.QT_VERSION }}
+          mkdir build && cd build
+          ${{ env.Qt6_DIR }}/bin/qt-cmake ..
+          cmake --build . --parallel
+          sudo cmake --install .
 
       - name: Create wrapper CMakeLists.txt
         run: |
