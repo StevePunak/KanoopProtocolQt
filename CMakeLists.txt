@@ -53,6 +53,16 @@ if(BUILD_TESTING)
     add_subdirectory(tests)
 endif()
 
+find_package(Doxygen OPTIONAL_COMPONENTS dot)
+if(Doxygen_FOUND)
+    add_custom_target(doc_KanoopProtocolQt
+        COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "Generating KanoopProtocolQt API documentation"
+        VERBATIM
+    )
+endif()
+
 add_compile_definitions(KANOOP_PROTOCOL_LIBRARY)
 add_compile_definitions(QT_DEPRECATED_WARNINGS)
 add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x060000)  # Disables all the APIs deprecated before Qt 6.0.0

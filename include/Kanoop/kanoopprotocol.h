@@ -2,6 +2,7 @@
 #define KANOOPPROTOCOL_H
 #include <Qt>
 
+/** @brief Export macro for the KanoopProtocol shared library. */
 #ifdef KANOOP_PROTOCOL_LIBRARY
 #define LIBKANOOPPROTOCOL_EXPORT Q_DECL_EXPORT
 #else

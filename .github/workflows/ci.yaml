@@ -10,6 +10,11 @@ on:
     branches:
       - master
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 env:
   QT_VERSION: "6.10.1"
 
@@ -33,7 +38,7 @@ jobs:
         run: |
           sudo apt update
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            cmake ninja-build build-essential \
+            cmake ninja-build build-essential doxygen graphviz \
             libgl1-mesa-dev libglu1-mesa-dev
 
       - name: Install Qt6
@@ -65,3 +70,27 @@ jobs:
 
       - name: Run integration tests
         run: ctest --test-dir build/KanoopProtocolQt --output-on-failure --tests-regex integration
+
+      - name: Generate Doxygen documentation
+        run: cmake --build build --target doc_KanoopProtocolQt
+
+      - name: Upload Pages artifact
+        if: github.ref == 'refs/heads/master'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: KanoopProtocolQt/docs/html
+
+  deploy-docs:
+    if: github.ref == 'refs/heads/master'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
