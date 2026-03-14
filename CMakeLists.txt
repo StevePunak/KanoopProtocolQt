@@ -16,9 +16,10 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(KANOOP_QTGUI_VERSION "1.2.3")
 
 file(GLOB_RECURSE PROJ_SOURCES
-    "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/*.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/*.qrc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.qrc"
 )
 
 qt_add_library(${PROJ} ${PROJ_SOURCES})
@@ -45,6 +46,12 @@ target_link_libraries(${PROJ} PRIVATE
     Qt6::SerialBus
     KanoopCommonQt
 )
+
+option(BUILD_TESTING "Build unit tests" ON)
+if(BUILD_TESTING)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
 
 add_compile_definitions(KANOOP_PROTOCOL_LIBRARY)
 add_compile_definitions(QT_DEPRECATED_WARNINGS)
