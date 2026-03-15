@@ -54,7 +54,7 @@ jobs:
           cd qtmqtt
           git checkout ${{ env.QT_VERSION }}
           mkdir build && cd build
-          ${{ env.Qt6_DIR }}/bin/qt-cmake ..
+          $QT_ROOT_DIR/bin/qt-cmake ..
           cmake --build . --parallel
           sudo cmake --install .
 
