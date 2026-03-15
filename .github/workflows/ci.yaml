@@ -46,7 +46,7 @@ jobs:
         uses: jurplel/install-qt-action@v4
         with:
           version: ${{ env.QT_VERSION }}
-          modules: qtwebsockets qtserialbus
+          modules: qtwebsockets qtserialbus qtserialport
 
       - name: Build Qt6 MQTT from source
         run: |
