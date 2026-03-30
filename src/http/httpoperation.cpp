@@ -122,6 +122,18 @@ void HttpOperation::threadStarted()
 
 void HttpOperation::threadFinished()
 {
+    // Clean up network objects on the correct thread (they were created
+    // in threadStarted/execute on this worker thread)
+    if(_reply != nullptr) {
+        disconnect(_reply, nullptr, this, nullptr);
+        _reply->abort();
+        delete _reply;
+        _reply = nullptr;
+    }
+    if(_networkAccessManager != nullptr) {
+        delete _networkAccessManager;
+        _networkAccessManager = nullptr;
+    }
     emit operationComplete();
 }
 
