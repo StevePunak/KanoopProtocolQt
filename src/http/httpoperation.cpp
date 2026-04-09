@@ -21,9 +21,6 @@ HttpOperation::HttpOperation(const QString& url, RequestMethod method) :
 
 HttpOperation::~HttpOperation()
 {
-    if(_networkAccessManager != nullptr) {
-        delete _networkAccessManager;
-    }
 }
 
 void HttpOperation::abortOperation()
@@ -106,6 +103,15 @@ bool HttpOperation::isHttps() const
     return false;
 }
 
+bool HttpOperation::waitForCompletion(const TimeSpan& timeout)
+{
+    if(timeout != TimeSpan::zero() && _transferTimeout >= timeout) {
+        logText(LVL_WARNING, QString("Transfer timeout (%1ms) >= operation timeout (%2ms) — thread may outlive caller")
+            .arg(_transferTimeout.totalMilliseconds()).arg(timeout.totalMilliseconds()));
+    }
+    return AbstractThreadClass::waitForCompletion(timeout);
+}
+
 void HttpOperation::threadStarted()
 {
     try
@@ -164,11 +170,6 @@ void HttpOperation::onReplyFinished()
     _statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     _reasonPhrase = HttpStatus::reasonPhrase(_statusCode);
     _responseBody = reply->readAll();
-
-    if(_networkAccessManager != nullptr) {
-        _networkAccessManager->deleteLater();
-        _networkAccessManager = nullptr;
-    }
 
     finishAndStop(success, message);
 }
