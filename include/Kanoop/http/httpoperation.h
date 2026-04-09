@@ -87,6 +87,14 @@ public:
     /** @brief Configure the operation to ignore self-signed certificate errors. */
     void ignoreSelfSignedCertificate();
 
+    /** @brief Block until the operation finishes or the timeout elapses.
+     *
+     * Warns if the Qt transfer timeout is >= the operation timeout, since
+     * that means the thread may outlive the caller and cause a crash.
+     * @param timeout Maximum wait duration (zero = wait indefinitely)
+     * @return true if the operation finished within the timeout */
+    bool waitForCompletion(const TimeSpan& timeout = TimeSpan::zero()) override;
+
     /** @brief Return the transfer timeout duration.
      * @return The transfer timeout as a TimeSpan. */
     TimeSpan transferTimeout() const { return _transferTimeout; }
