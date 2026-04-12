@@ -4,6 +4,7 @@
 #include <Kanoop/http/httpheaders.h>
 
 #include <QNetworkCookie>
+#include <QNetworkProxy>
 #include <QNetworkReply>
 #include <Kanoop/kanoopprotocol.h>
 
@@ -72,8 +73,9 @@ public:
      * @return The list of response cookies. */
     QList<QNetworkCookie> responseCookies() const { return _responseCookies; }
 
-    /** @brief Return whether peer SSL certificate verification is enabled.
-     * @return True if peer verification is enabled. */
+    QNetworkProxy networkProxy() const { return _networkProxy; }
+    void setNetworkProxy(const QNetworkProxy& value) { _networkProxy = value; }
+
     bool isVerifyPeer() const { return _verifyPeer; }
 
     /** @brief Enable or disable peer SSL certificate verification.
@@ -201,6 +203,7 @@ private:
 
     QList<QSslError::SslError> _ignoreSslErrors;
 
+    QNetworkProxy _networkProxy;
     bool _verifyPeer = true;
 
     QDateTime _operationStartTime;

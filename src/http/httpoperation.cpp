@@ -57,6 +57,9 @@ QNetworkAccessManager* HttpOperation::networkAccessManager()
 {
     if(_networkAccessManager == nullptr) {
         _networkAccessManager = new QNetworkAccessManager(this);
+        if(_networkProxy.type() != QNetworkProxy::DefaultProxy) {
+            _networkAccessManager->setProxy(_networkProxy);
+        }
     }
     return _networkAccessManager;
 }
