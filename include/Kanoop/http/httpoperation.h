@@ -6,6 +6,8 @@
 #include <QNetworkCookie>
 #include <QNetworkProxy>
 #include <QNetworkReply>
+#include <QSslCertificate>
+#include <QSslKey>
 #include <Kanoop/kanoopprotocol.h>
 
 class QNetworkAccessManager;
@@ -81,6 +83,15 @@ public:
     /** @brief Enable or disable peer SSL certificate verification.
      * @param value True to verify the peer certificate. */
     void setVerifyPeer(bool value) { _verifyPeer = value; }
+
+    /** @brief Sets the client certificate to present at TLS handshake. */
+    void setLocalCertificate(const QSslCertificate& cert) { _localCertificate = cert; }
+
+    /** @brief Sets the client private key to present at TLS handshake. */
+    void setPrivateKey(const QSslKey& key) { _privateKey = key; }
+
+    /** @brief Returns the raw `Authorization` header from the response, or empty if none was returned. */
+    QByteArray responseAuthorizationHeader() const { return _responseAuthorizationHeader; }
 
     /** @brief Return whether self-signed certificate errors are being ignored.
      * @return True if self-signed certificate errors are ignored. */
@@ -205,6 +216,10 @@ private:
 
     QNetworkProxy _networkProxy;
     bool _verifyPeer = true;
+
+    QSslCertificate _localCertificate;
+    QSslKey         _privateKey;
+    QByteArray      _responseAuthorizationHeader;
 
     QDateTime _operationStartTime;
     TimeSpan _transferTimeout = TimeSpan::fromMilliseconds(QNetworkRequest::DefaultTransferTimeoutConstant);

@@ -93,6 +93,14 @@ void HttpOperation::configureSsl(QNetworkRequest* request)
     if(isHttps()) {
         QSslConfiguration sslConfig = request->sslConfiguration();
         sslConfig.setPeerVerifyMode(_verifyPeer ? QSslSocket::VerifyPeer : QSslSocket::VerifyNone);
+
+        if(_localCertificate.isNull() == false) {
+            sslConfig.setLocalCertificate(_localCertificate);
+        }
+        if(_privateKey.isNull() == false) {
+            sslConfig.setPrivateKey(_privateKey);
+        }
+
         request->setSslConfiguration(sslConfig);
     }
 }
@@ -162,6 +170,9 @@ void HttpOperation::onReplyFinished()
         QByteArray payload = pair.second;
         if(QString::compare(name, "set-cookie", Qt::CaseInsensitive) == 0) {
             _responseCookies.append(QNetworkCookie::parseCookies(payload));
+        }
+        else if(QString::compare(name, "authorization", Qt::CaseInsensitive) == 0) {
+            _responseAuthorizationHeader = payload;
         }
     }
 
