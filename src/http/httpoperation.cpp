@@ -139,23 +139,30 @@ void HttpOperation::threadStarted()
 
 void HttpOperation::threadFinished()
 {
+    logText(LVL_DEBUG, QString("%1: threadFinished: entry").arg(objectName()));
     // Clean up network objects on the correct thread (they were created
     // in threadStarted/execute on this worker thread)
     if(_reply != nullptr) {
+        logText(LVL_DEBUG, QString("%1: threadFinished: aborting+deleting reply").arg(objectName()));
         disconnect(_reply, nullptr, this, nullptr);
         _reply->abort();
         delete _reply;
         _reply = nullptr;
+        logText(LVL_DEBUG, QString("%1: threadFinished: reply deleted").arg(objectName()));
     }
     if(_networkAccessManager != nullptr) {
+        logText(LVL_DEBUG, QString("%1: threadFinished: deleting NetworkAccessManager").arg(objectName()));
         delete _networkAccessManager;
         _networkAccessManager = nullptr;
+        logText(LVL_DEBUG, QString("%1: threadFinished: NetworkAccessManager deleted").arg(objectName()));
     }
     emit operationComplete();
+    logText(LVL_DEBUG, QString("%1: threadFinished: exit (operationComplete emitted)").arg(objectName()));
 }
 
 void HttpOperation::onReplyFinished()
 {
+    logText(LVL_DEBUG, QString("%1: onReplyFinished: entry").arg(objectName()));
     QNetworkReply* reply = dynamic_cast<QNetworkReply*>(sender());
     Q_ASSERT(reply);
 
@@ -185,7 +192,10 @@ void HttpOperation::onReplyFinished()
     _reasonPhrase = HttpStatus::reasonPhrase(_statusCode);
     _responseBody = reply->readAll();
 
+    logText(LVL_DEBUG, QString("%1: onReplyFinished: status=%2 bodyLen=%3 about to finishAndStop")
+            .arg(objectName()).arg(_statusCode).arg(_responseBody.size()));
     finishAndStop(success, message);
+    logText(LVL_DEBUG, QString("%1: onReplyFinished: finishAndStop returned").arg(objectName()));
 }
 
 void HttpOperation::onSslErrors(const QList<QSslError>& errors)
