@@ -1,5 +1,5 @@
 #include "http/httpoperation.h"
-#include "httpstatuscodes.h"
+#include <Kanoop/http/httpstatuscodes.h>
 
 #include <QNetworkAccessManager>
 #include <QTimer>
