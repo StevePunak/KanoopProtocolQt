@@ -10,8 +10,7 @@
 #include <Kanoop/http/httpupload.h>
 #include <Kanoop/timespan.h>
 
-// Internal third-party header for HttpStatus utilities
-#include <http/httpstatuscodes.h>
+#include <Kanoop/http/httpstatuscodes.h>
 
 class TstHttp : public QObject
 {
