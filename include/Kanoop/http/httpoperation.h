@@ -188,6 +188,12 @@ protected:
 private:
     virtual void threadStarted() override;
 
+    /** @brief Emitted to queue an abort onto the operation's own thread. */
+    Q_SIGNAL void abortRequested();
+
+    /** @brief Abort the network reply (runs on the operation's own thread). */
+    Q_SLOT void abortReply();
+
     QString _url;
     RequestMethod _method;
 

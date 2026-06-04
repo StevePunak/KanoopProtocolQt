@@ -17,6 +17,7 @@ HttpOperation::HttpOperation(const QString& url, RequestMethod method) :
     AbstractThreadClass("http-op"),
     _url(url), _method(method)
 {
+    connect(this, &HttpOperation::abortRequested, this, &HttpOperation::abortReply);
 }
 
 HttpOperation::~HttpOperation()
@@ -25,26 +26,35 @@ HttpOperation::~HttpOperation()
 
 void HttpOperation::abortOperation()
 {
-    logText(LVL_DEBUG, QString("TEARDOWN %1: abortOperation enter — reply=%2 crossThread=%3 (caller=0x%4)")
+    logText(LVL_DEBUG, QString("TEARDOWN %1: abortOperation enter — crossThread=%2 (caller=0x%3)")
             .arg(objectName())
-            .arg(_reply != nullptr)
             .arg(QThread::currentThread() != thread())
             .arg((quintptr)QThread::currentThread(), 0, 16));
-    if(_reply == nullptr) {
-        logText(LVL_ERROR, QString("%1: Tried to abort with no operation in progress").arg(objectName()));
-        return;
-    }
     if(QThread::currentThread() != thread()) {
-        QTimer::singleShot(0, _reply, &QNetworkReply::abort);
+        // Never touch _reply from a foreign thread — the worker deletes and
+        // nulls it in threadFinished(). Queue the abort onto our own thread;
+        // if the event loop is already gone the event is simply dropped and
+        // waitForCompletion() synchronizes with the exit that made it moot.
+        emit abortRequested();
         if(waitForCompletion(TimeSpan::fromSeconds(3)) == false) {
             logText(LVL_ERROR, QString("%1: Thread never completed after abort").arg(objectName()));
         }
     }
     else {
-        _reply->abort();
+        abortReply();
     }
-    _reply = nullptr;
     logText(LVL_DEBUG, QString("TEARDOWN %1: abortOperation exit").arg(objectName()));
+}
+
+void HttpOperation::abortReply()
+{
+    if(_reply != nullptr) {
+        _reply->abort();
+        _reply = nullptr;
+    }
+    else {
+        logText(LVL_DEBUG, QString("%1: Abort requested with no operation in progress").arg(objectName()));
+    }
 }
 
 bool HttpOperation::isSelfSignedCertificateErrorIgnored() const
