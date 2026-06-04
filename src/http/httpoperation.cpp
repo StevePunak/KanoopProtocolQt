@@ -25,6 +25,11 @@ HttpOperation::~HttpOperation()
 
 void HttpOperation::abortOperation()
 {
+    logText(LVL_DEBUG, QString("TEARDOWN %1: abortOperation enter — reply=%2 crossThread=%3 (caller=0x%4)")
+            .arg(objectName())
+            .arg(_reply != nullptr)
+            .arg(QThread::currentThread() != thread())
+            .arg((quintptr)QThread::currentThread(), 0, 16));
     if(_reply == nullptr) {
         logText(LVL_ERROR, QString("%1: Tried to abort with no operation in progress").arg(objectName()));
         return;
@@ -39,6 +44,7 @@ void HttpOperation::abortOperation()
         _reply->abort();
     }
     _reply = nullptr;
+    logText(LVL_DEBUG, QString("TEARDOWN %1: abortOperation exit").arg(objectName()));
 }
 
 bool HttpOperation::isSelfSignedCertificateErrorIgnored() const
