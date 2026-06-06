@@ -63,3 +63,5 @@ void HttpUpload::execute()
         finishAndStop(false, e.message());
     }
 }
+
+#include "Kanoop/http/moc_httpupload.cpp"

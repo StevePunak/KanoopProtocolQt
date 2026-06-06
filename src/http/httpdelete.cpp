@@ -20,3 +20,5 @@ void HttpDelete::execute()
 
     postDeleteHook();
 }
+
+#include "Kanoop/http/moc_httpdelete.cpp"
