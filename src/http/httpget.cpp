@@ -65,3 +65,5 @@ void HttpGet::onStreamingReadyRead()
 }
 
 
+
+#include "Kanoop/http/moc_httpget.cpp"

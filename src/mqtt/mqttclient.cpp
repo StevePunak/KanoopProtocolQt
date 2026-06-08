@@ -153,3 +153,5 @@ void MqttClient::onErrorChanged(QMqttClient::ClientError errorCode)
     error(errorCode);
     emit clientError(errorCode);
 }
+
+#include "Kanoop/mqtt/moc_mqttclient.cpp"
