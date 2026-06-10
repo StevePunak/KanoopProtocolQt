@@ -23,3 +23,5 @@ void HttpPut::execute()
 
     postPutHook();
 }
+
+#include "Kanoop/http/moc_httpput.cpp"

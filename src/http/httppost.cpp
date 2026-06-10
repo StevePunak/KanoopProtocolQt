@@ -20,3 +20,5 @@ void HttpPost::execute()
 
     postPostHook();
 }
+
+#include "Kanoop/http/moc_httppost.cpp"

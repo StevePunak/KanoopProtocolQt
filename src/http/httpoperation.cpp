@@ -216,3 +216,5 @@ void HttpOperation::onReplyError(QNetworkReply::NetworkError error)
 {
     _networkError = error;
 }
+
+#include "Kanoop/http/moc_httpoperation.cpp"
