@@ -93,6 +93,10 @@ void HttpOperation::configureSsl(QNetworkRequest* request)
     if(isHttps()) {
         QSslConfiguration sslConfig = request->sslConfiguration();
         sslConfig.setPeerVerifyMode(_verifyPeer ? QSslSocket::VerifyPeer : QSslSocket::VerifyNone);
+        if(_localCertificate.isNull() == false && _privateKey.isNull() == false) {
+            sslConfig.setLocalCertificate(_localCertificate);
+            sslConfig.setPrivateKey(_privateKey);
+        }
         request->setSslConfiguration(sslConfig);
     }
 }
