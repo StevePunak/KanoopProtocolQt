@@ -177,6 +177,7 @@ void HttpOperation::onReplyFinished()
     _statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     _reasonPhrase = HttpStatus::reasonPhrase(_statusCode);
     _responseBody = reply->readAll();
+    _peerCertificate = reply->sslConfiguration().peerCertificate();
 
     finishAndStop(success, message);
 }

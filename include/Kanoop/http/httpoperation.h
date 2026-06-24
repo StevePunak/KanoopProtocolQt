@@ -88,6 +88,10 @@ public:
      * @return The local certificate; null if mTLS is not engaged. */
     QSslCertificate localCertificate() const { return _localCertificate; }
 
+    /** @brief Returns the peer (server) certificate captured from the completed TLS handshake.
+     * @return The peer certificate; null for non-TLS operations or before completion. */
+    QSslCertificate peerCertificate() const { return _peerCertificate; }
+
     /** @brief Set the local client certificate to present at the TLS handshake.
      *
      * Setting both a non-null certificate and a non-null private key engages
@@ -228,6 +232,7 @@ private:
     QNetworkProxy _networkProxy;
     bool _verifyPeer = true;
     QSslCertificate _localCertificate;
+    QSslCertificate _peerCertificate;
     QSslKey _privateKey;
 
     QDateTime _operationStartTime;
