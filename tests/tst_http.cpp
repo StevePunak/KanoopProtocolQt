@@ -41,6 +41,16 @@ static const char* const FixtureSubCaPem =
     "GcqJi/j/QORfOPEiItq764q5y2jL\n"
     "-----END CERTIFICATE-----\n";
 
+// Throwaway private key paired with no particular certificate above — configureSsl()
+// only checks that a private key is present, it never validates that the key matches
+// the leaf, so any parseable EC key satisfies the guard.
+static const char* const FixtureLeafKeyPem =
+    "-----BEGIN EC PRIVATE KEY-----\n"
+    "MHcCAQEEIE9P4mhT9QdH20NEr6//JiSNMpva11PS+aV2/2dHPRBYoAoGCCqGSM49\n"
+    "AwEHoUQDQgAEcPmodQTBJcpp+v/wnvAwbzRkKkgir1m0jSTZIkl0c0XWCoC5gEv/\n"
+    "YR7BJ79ICvj1eblw5DIgxyNyeIJbAj3OUw==\n"
+    "-----END EC PRIVATE KEY-----\n";
+
 static QList<QSslCertificate> fixtureChain()
 {
     QList<QSslCertificate> chain;
@@ -48,6 +58,16 @@ static QList<QSslCertificate> fixtureChain()
     chain.append(QSslCertificate(QByteArray(FixtureSubCaPem), QSsl::Pem));
     return chain;
 }
+
+// Test-local subclass exposing the protected configureSsl() so it can be pinned
+// directly rather than only indirectly through execute().
+class SslConfiguringHttpGet : public HttpGet
+{
+public:
+    explicit SslConfiguringHttpGet(const QString& url) : HttpGet(url) {}
+
+    void callConfigureSsl(QNetworkRequest* request) { configureSsl(request); }
+};
 
 class TstHttp : public QObject
 {
@@ -387,6 +407,41 @@ private slots:
         QVERIFY2(op.localCertificateChain().isEmpty(),
                  "a null certificate must yield an empty chain, not a one-element chain holding a null");
         QVERIFY(op.localCertificate().isNull());
+    }
+
+    // ---- HttpOperation::configureSsl (SC-6036) ----
+
+    void configureSslPresentsFullChainToQt()
+    {
+        const QList<QSslCertificate> chain = fixtureChain();
+        const QSslKey key(QByteArray(FixtureLeafKeyPem), QSsl::Ec, QSsl::Pem, QSsl::PrivateKey);
+        QVERIFY(key.isNull() == false);
+
+        SslConfiguringHttpGet op("https://example.com");
+        op.setLocalCertificateChain(chain);
+        op.setPrivateKey(key);
+
+        QNetworkRequest request;
+        op.callConfigureSsl(&request);
+
+        const QList<QSslCertificate> presented = request.sslConfiguration().localCertificateChain();
+        QCOMPARE(presented.count(), 2);
+        QCOMPARE(presented.at(0).subjectInfo(QSslCertificate::CommonName).value(0),
+                 QStringLiteral("SC6036 Test Leaf"));
+    }
+
+    void configureSslWithNullLeafDoesNotEngageMtls()
+    {
+        const QList<QSslCertificate> nullLeafChain = QList<QSslCertificate>() << QSslCertificate();
+
+        SslConfiguringHttpGet op("https://example.com");
+        op.setLocalCertificateChain(nullLeafChain);
+
+        QNetworkRequest request;
+        op.callConfigureSsl(&request);
+
+        QVERIFY2(request.sslConfiguration().localCertificateChain().isEmpty(),
+                 "a one-element chain holding a null certificate must not engage mTLS");
     }
 };
 
