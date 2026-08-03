@@ -1,5 +1,6 @@
 #include <QTest>
 #include <QNetworkRequest>
+#include <QSslCertificate>
 
 #include <Kanoop/http/httpheaders.h>
 #include <Kanoop/http/httpoperation.h>
@@ -11,6 +12,42 @@
 #include <Kanoop/timespan.h>
 
 #include <Kanoop/http/httpstatuscodes.h>
+
+// Throwaway fixture chain for SC-6036 (leaf issued by the sub-CA below). Not a
+// real credential and never presented to anything — it exists so the chain
+// accessors are exercised against non-null, correctly ordered certificates.
+static const char* const FixtureLeafPem =
+    "-----BEGIN CERTIFICATE-----\n"
+    "MIIBfjCCASSgAwIBAgIUO/l0EsMloCIzj9c7QvzK8Uoh27YwCgYIKoZIzj0EAwIw\n"
+    "HTEbMBkGA1UEAwwSU0M2MDM2IFRlc3QgU3ViLUNBMCAXDTI2MDgwMzIxNTcwN1oY\n"
+    "DzIxMjYwNzEwMjE1NzA3WjAbMRkwFwYDVQQDDBBTQzYwMzYgVGVzdCBMZWFmMFkw\n"
+    "EwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE8OHKWrpYjxqWlBx30cQ8z0Xjq0qnNBnb\n"
+    "lR5/kRRsdfulbCGb55JrvsVUcuWUgGX/Vwx1WmxEvyNgFb7jaoC8QaNCMEAwHQYD\n"
+    "VR0OBBYEFFk/XwxYR0wl68lMkucaD5/MvvlMMB8GA1UdIwQYMBaAFPch93e7EccG\n"
+    "NgQcVD0my4dUvGAuMAoGCCqGSM49BAMCA0gAMEUCIDpxMCbP6d3ex/7tNBcrC6dm\n"
+    "OpvK7qfl7m118JkoJF6/AiEA+l8TZ4jeNWFNUM2sPLC3EPjMX/bOgIjPKnCN5Q2x\n"
+    "bfc=\n"
+    "-----END CERTIFICATE-----\n";
+static const char* const FixtureSubCaPem =
+    "-----BEGIN CERTIFICATE-----\n"
+    "MIIBkTCCATegAwIBAgIUKycV5QWXbhRnzcbmtpr9Pap5TbEwCgYIKoZIzj0EAwIw\n"
+    "HTEbMBkGA1UEAwwSU0M2MDM2IFRlc3QgU3ViLUNBMCAXDTI2MDgwMzIxNTcwN1oY\n"
+    "DzIxMjYwNzEwMjE1NzA3WjAdMRswGQYDVQQDDBJTQzYwMzYgVGVzdCBTdWItQ0Ew\n"
+    "WTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAATD/vRUOTNQNu/wsQFmF2KZmZAhkBHg\n"
+    "R6pFMRKq6YBolZsjn3QAhXHxX7M2/NeM+JGEP+Z8FXO6F91N6ypFqVVOo1MwUTAd\n"
+    "BgNVHQ4EFgQU9yH3d7sRxwY2BBxUPSbLh1S8YC4wHwYDVR0jBBgwFoAU9yH3d7sR\n"
+    "xwY2BBxUPSbLh1S8YC4wDwYDVR0TAQH/BAUwAwEB/zAKBggqhkjOPQQDAgNIADBF\n"
+    "AiAGkRxP5yLe7i8Bf3H1zWnBPzqLi5td318iedUYbK/91QIhAM78XWMux56TyUE6\n"
+    "GcqJi/j/QORfOPEiItq764q5y2jL\n"
+    "-----END CERTIFICATE-----\n";
+
+static QList<QSslCertificate> fixtureChain()
+{
+    QList<QSslCertificate> chain;
+    chain.append(QSslCertificate(QByteArray(FixtureLeafPem), QSsl::Pem));
+    chain.append(QSslCertificate(QByteArray(FixtureSubCaPem), QSsl::Pem));
+    return chain;
+}
 
 class TstHttp : public QObject
 {
@@ -308,6 +345,48 @@ private slots:
         QCOMPARE(HttpStatus::reasonPhrase(404), QString("Not Found"));
         QCOMPARE(HttpStatus::reasonPhrase(500), QString("Internal Server Error"));
         QCOMPARE(HttpStatus::reasonPhrase(201), QString("Created"));
+    }
+
+    // ---- HttpOperation client certificate chain (SC-6036) ----
+
+    void localCertificateChainRoundTripsLeafFirst()
+    {
+        const QList<QSslCertificate> chain = fixtureChain();
+        QVERIFY(chain.at(0).isNull() == false);      // fixture parsed
+        QVERIFY(chain.at(1).isNull() == false);
+
+        HttpGet op("https://example.com");
+        op.setLocalCertificateChain(chain);
+
+        QCOMPARE(op.localCertificateChain().count(), 2);
+        QCOMPARE(op.localCertificateChain(), chain);
+        // localCertificate() must be the LEAF, not the sub-CA: Qt presents the chain
+        // leaf-first, and a reversed chain fails path building at the peer.
+        QCOMPARE(op.localCertificate(), chain.at(0));
+        QCOMPARE(op.localCertificate().subjectInfo(QSslCertificate::CommonName).value(0),
+                 QStringLiteral("SC6036 Test Leaf"));
+    }
+
+    void setLocalCertificateNormalizesToSingleElementChain()
+    {
+        const QSslCertificate leaf = fixtureChain().at(0);
+        QVERIFY(leaf.isNull() == false);
+
+        HttpGet op("https://example.com");
+        op.setLocalCertificate(leaf);
+
+        QCOMPARE(op.localCertificateChain().count(), 1);
+        QCOMPARE(op.localCertificateChain().at(0), leaf);
+        QCOMPARE(op.localCertificate(), leaf);
+    }
+
+    void setLocalCertificateWithNullYieldsEmptyChain()
+    {
+        HttpGet op("https://example.com");
+        op.setLocalCertificate(QSslCertificate());
+        QVERIFY2(op.localCertificateChain().isEmpty(),
+                 "a null certificate must yield an empty chain, not a one-element chain holding a null");
+        QVERIFY(op.localCertificate().isNull());
     }
 };
 
