@@ -93,7 +93,9 @@ void HttpOperation::configureSsl(QNetworkRequest* request)
     if(isHttps()) {
         QSslConfiguration sslConfig = request->sslConfiguration();
         sslConfig.setPeerVerifyMode(_verifyPeer ? QSslSocket::VerifyPeer : QSslSocket::VerifyNone);
-        if(_localCertificateChain.isEmpty() == false && _privateKey.isNull() == false) {
+        // Test the leaf, not the container: an empty chain and a one-element chain
+        // holding a null certificate must both fail to engage mTLS.
+        if(localCertificate().isNull() == false && _privateKey.isNull() == false) {
             sslConfig.setLocalCertificateChain(_localCertificateChain);
             sslConfig.setPrivateKey(_privateKey);
         }
