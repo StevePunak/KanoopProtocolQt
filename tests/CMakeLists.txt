@@ -19,3 +19,12 @@ endfunction()
 add_protocol_test(tst_mqtt_parameters)
 add_protocol_test(tst_http)
 add_protocol_test(tst_http_integration)
+
+# tst_http_integration is opt-in (KANOOP_RUN_NETWORK_TESTS, see the comment at the
+# top of the source file) and exits 0 whether it ran or skipped. Without this, a
+# default `ctest` run would silently report it as "Passed" even though nothing was
+# actually exercised. Recognize QtTest's SKIP output so ctest surfaces it as
+# "Not Run" instead.
+set_tests_properties(tst_http_integration PROPERTIES
+    SKIP_REGULAR_EXPRESSION "SKIP   :"
+)
