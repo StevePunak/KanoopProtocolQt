@@ -30,12 +30,26 @@
 // failure is an actual code regression rather than network noise.
 static const QString BASE_URL = "https://httpbin.org";
 
-// Helper: run an HttpOperation synchronously with a timeout
-static bool waitForComplete(HttpOperation* op, int timeoutMs = 10000)
+// Helper: run an HttpOperation synchronously and wait for it to complete.
+//
+// INVARIANT: the spy wait below must outlast the operation's own transfer
+// timeout, with headroom. If it did not, the spy can give up while the
+// transfer is still legitimately in flight, and the test reports a bare
+// "waitForComplete returned FALSE" instead of the operation's real outcome
+// (a completed request, a genuine timeout, or an HTTP error). That exact
+// mismatch — a fixed 10s wait against tests that configure a 15s transfer
+// timeout — is what made this suite look like it was hitting flaky external
+// service timeouts, when the harness was actually giving up early. Deriving
+// the wait from the operation's own transferTimeout() keeps the two in sync
+// automatically, so the transfer timeout is always what fires first.
+static bool waitForComplete(HttpOperation* op)
 {
+    static const int WAIT_HEADROOM_MS = 5000;
+    const int waitMs = static_cast<int>(op->transferTimeout().totalMilliseconds()) + WAIT_HEADROOM_MS;
+
     QSignalSpy spy(op, &HttpOperation::operationComplete);
     op->start();
-    return spy.wait(timeoutMs);
+    return spy.wait(waitMs);
 }
 
 class TstHttpIntegration : public QObject
@@ -55,7 +69,7 @@ private slots:
         HttpGet probe(BASE_URL + "/get");
         probe.setVerifyPeer(false);
         probe.setTransferTimeout(TimeSpan::fromSeconds(5));
-        if(waitForComplete(&probe, 5000) == false || probe.networkError() != QNetworkReply::NoError) {
+        if(waitForComplete(&probe) == false || probe.networkError() != QNetworkReply::NoError) {
             QSKIP(qPrintable(QString("httpbin.org is unreachable (network error %1); skipping live network tests")
                               .arg(static_cast<int>(probe.networkError()))));
         }
