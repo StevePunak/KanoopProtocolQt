@@ -6,6 +6,8 @@
 #include <QNetworkCookie>
 #include <QNetworkProxy>
 #include <QNetworkReply>
+#include <QSslCertificate>
+#include <QSslKey>
 #include <Kanoop/kanoopprotocol.h>
 
 class QNetworkAccessManager;
@@ -81,6 +83,50 @@ public:
     /** @brief Enable or disable peer SSL certificate verification.
      * @param value True to verify the peer certificate. */
     void setVerifyPeer(bool value) { _verifyPeer = value; }
+
+    /** @brief Returns the leaf of the local client certificate chain presented at the TLS handshake.
+     * @return The leaf certificate; null if mTLS is not engaged. */
+    QSslCertificate localCertificate() const { return _localCertificateChain.value(0); }
+
+    /** @brief Returns the full local client certificate chain presented at the TLS handshake.
+     * @return The leaf-first chain; empty if mTLS is not engaged. */
+    QList<QSslCertificate> localCertificateChain() const { return _localCertificateChain; }
+
+    /** @brief Returns the peer (server) certificate captured from the completed TLS handshake.
+     * @return The peer certificate; null for non-TLS operations or before completion. */
+    QSslCertificate peerCertificate() const { return _peerCertificate; }
+
+    /** @brief Set the local client certificate to present at the TLS handshake.
+     *
+     * Convenience for a single-certificate chain. Setting both a non-null certificate
+     * and a non-null private key engages mTLS client authentication for this operation.
+     * Either left at the default leaves the connection in server-auth-only mode. Prefer
+     * setLocalCertificateChain() whenever the peer anchors on a root rather than on the
+     * certificate's direct issuer.
+     * @param value The local client certificate. */
+    void setLocalCertificate(const QSslCertificate& value)
+    {
+        _localCertificateChain = value.isNull() ? QList<QSslCertificate>() : QList<QSslCertificate>() << value;
+    }
+
+    /** @brief Set the local client certificate chain to present at the TLS handshake.
+     *
+     * The chain must be leaf-first: the client's own certificate followed by its issuing
+     * intermediate CA(s). A self-signed root may be present but carries no information —
+     * a verifier anchored on that root already holds it. Presenting the chain is required
+     * whenever the peer's trust store holds only the root: the verifier cannot build a path
+     * from a bare leaf, and the handshake then fails below HTTP with no status code to
+     * inspect.
+     * @param value The leaf-first client certificate chain. */
+    void setLocalCertificateChain(const QList<QSslCertificate>& value) { _localCertificateChain = value; }
+
+    /** @brief Returns the private key paired with the local client certificate.
+     * @return The private key; null if mTLS is not engaged. */
+    QSslKey privateKey() const { return _privateKey; }
+
+    /** @brief Set the private key paired with the local client certificate.
+     * @param value The private key. */
+    void setPrivateKey(const QSslKey& value) { _privateKey = value; }
 
     /** @brief Return whether self-signed certificate errors are being ignored.
      * @return True if self-signed certificate errors are ignored. */
@@ -211,6 +257,9 @@ private:
 
     QNetworkProxy _networkProxy;
     bool _verifyPeer = true;
+    QList<QSslCertificate> _localCertificateChain;
+    QSslCertificate _peerCertificate;
+    QSslKey _privateKey;
 
     QDateTime _operationStartTime;
     TimeSpan _transferTimeout = TimeSpan::fromMilliseconds(QNetworkRequest::DefaultTransferTimeoutConstant);
