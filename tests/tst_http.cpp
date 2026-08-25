@@ -428,20 +428,41 @@ private slots:
         QCOMPARE(presented.count(), 2);
         QCOMPARE(presented.at(0).subjectInfo(QSslCertificate::CommonName).value(0),
                  QStringLiteral("SC6036 Test Leaf"));
+        QCOMPARE(presented.at(1).subjectInfo(QSslCertificate::CommonName).value(0),
+                 QStringLiteral("SC6036 Test Sub-CA"));
     }
 
     void configureSslWithNullLeafDoesNotEngageMtls()
     {
         const QList<QSslCertificate> nullLeafChain = QList<QSslCertificate>() << QSslCertificate();
+        const QSslKey key(QByteArray(FixtureLeafKeyPem), QSsl::Ec, QSsl::Pem, QSsl::PrivateKey);
+        QVERIFY(key.isNull() == false);
 
         SslConfiguringHttpGet op("https://example.com");
         op.setLocalCertificateChain(nullLeafChain);
+        op.setPrivateKey(key);
 
         QNetworkRequest request;
         op.callConfigureSsl(&request);
 
         QVERIFY2(request.sslConfiguration().localCertificateChain().isEmpty(),
                  "a one-element chain holding a null certificate must not engage mTLS");
+    }
+
+    void configureSslWithEmptyChainDoesNotEngageMtls()
+    {
+        const QSslKey key(QByteArray(FixtureLeafKeyPem), QSsl::Ec, QSsl::Pem, QSsl::PrivateKey);
+        QVERIFY(key.isNull() == false);
+
+        SslConfiguringHttpGet op("https://example.com");
+        op.setLocalCertificateChain(QList<QSslCertificate>());
+        op.setPrivateKey(key);
+
+        QNetworkRequest request;
+        op.callConfigureSsl(&request);
+
+        QVERIFY2(request.sslConfiguration().localCertificateChain().isEmpty(),
+                 "an empty chain must not engage mTLS");
     }
 };
 
