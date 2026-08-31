@@ -2,7 +2,6 @@
 #include <Kanoop/http/httpstatuscodes.h>
 
 #include <QNetworkAccessManager>
-#include <QTimer>
 
 #include <Kanoop/commonexception.h>
 
@@ -26,10 +25,6 @@ HttpOperation::~HttpOperation()
 
 void HttpOperation::abortOperation()
 {
-    logText(LVL_DEBUG, QString("TEARDOWN %1: abortOperation enter — crossThread=%2 (caller=0x%3)")
-            .arg(objectName())
-            .arg(QThread::currentThread() != thread())
-            .arg((quintptr)QThread::currentThread(), 0, 16));
     if(QThread::currentThread() != thread()) {
         // Never touch _reply from a foreign thread — the worker deletes and
         // nulls it in threadFinished(). Queue the abort onto our own thread;
@@ -43,7 +38,6 @@ void HttpOperation::abortOperation()
     else {
         abortReply();
     }
-    logText(LVL_DEBUG, QString("TEARDOWN %1: abortOperation exit").arg(objectName()));
 }
 
 void HttpOperation::abortReply()
