@@ -17,12 +17,8 @@ public:
      * @param value The parameter value. */
     void addParameter(const QString& key, const QString& value);
 
-    /**
-     * @brief streamingRead
-     * Set to true to return the response piece by piece as available
-     * using the `dataAvailable()` signal
-     * @return True if streaming read mode is enabled.
-     */
+    /** @brief Return whether streaming read mode is enabled.
+     * @return True if the response is delivered in chunks through dataAvailable(). */
     bool streamingRead() const { return _streamingRead; }
 
     /** @brief Enable or disable streaming read mode.

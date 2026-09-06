@@ -101,7 +101,6 @@ private slots:
     {
         MqttParameters p;
         QVERIFY(p.clientCertificate().isNull());
-        // Setting with a null cert is valid — just verifies the setter works
         QSslCertificate cert;
         p.setClientCertificate(cert);
         QVERIFY(p.clientCertificate().isNull()); // still null, no file loaded

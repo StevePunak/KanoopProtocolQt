@@ -14,8 +14,7 @@
 #include <Kanoop/http/httpstatuscodes.h>
 
 // Throwaway fixture chain for SC-6036 (leaf issued by the sub-CA below). Not a
-// real credential and never presented to anything — it exists so the chain
-// accessors are exercised against non-null, correctly ordered certificates.
+// real credential and never presented to anything.
 static const char* const FixtureLeafPem =
     "-----BEGIN CERTIFICATE-----\n"
     "MIIBfjCCASSgAwIBAgIUO/l0EsMloCIzj9c7QvzK8Uoh27YwCgYIKoZIzj0EAwIw\n"
@@ -41,9 +40,7 @@ static const char* const FixtureSubCaPem =
     "GcqJi/j/QORfOPEiItq764q5y2jL\n"
     "-----END CERTIFICATE-----\n";
 
-// Throwaway private key paired with no particular certificate above — configureSsl()
-// only checks that a private key is present, it never validates that the key matches
-// the leaf, so any parseable EC key satisfies the guard.
+// Throwaway private key, paired with no particular certificate above.
 static const char* const FixtureLeafKeyPem =
     "-----BEGIN EC PRIVATE KEY-----\n"
     "MHcCAQEEIE9P4mhT9QdH20NEr6//JiSNMpva11PS+aV2/2dHPRBYoAoGCCqGSM49\n"
@@ -59,8 +56,7 @@ static QList<QSslCertificate> fixtureChain()
     return chain;
 }
 
-// Test-local subclass exposing the protected configureSsl() so it can be pinned
-// directly rather than only indirectly through execute().
+// Test-local subclass exposing the protected configureSsl().
 class SslConfiguringHttpGet : public HttpGet
 {
 public:
@@ -380,8 +376,8 @@ private slots:
 
         QCOMPARE(op.localCertificateChain().count(), 2);
         QCOMPARE(op.localCertificateChain(), chain);
-        // localCertificate() must be the LEAF, not the sub-CA: Qt presents the chain
-        // leaf-first, and a reversed chain fails path building at the peer.
+        // localCertificate() must be the chain leaf. Qt requires the chain leaf-first;
+        // a reversed chain fails path building at the peer.
         QCOMPARE(op.localCertificate(), chain.at(0));
         QCOMPARE(op.localCertificate().subjectInfo(QSslCertificate::CommonName).value(0),
                  QStringLiteral("SC6036 Test Leaf"));

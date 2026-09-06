@@ -13,18 +13,16 @@
 // service) to exercise HttpGet/HttpPost/HttpPut/HttpDelete end-to-end over real TLS.
 // It is opt-in and gated behind KANOOP_RUN_NETWORK_TESTS so that ordinary `ctest`
 // runs (including CI) are deterministic: a flaky internet connection or httpbin.org
-// downtime must never fail a PR that has nothing to do with HTTP code. See the
-// SC-6036 follow-up notes for why this was added.
+// downtime must never fail a PR that has nothing to do with HTTP code.
 //
 // Run it deliberately with:
 //   KANOOP_RUN_NETWORK_TESTS=1 ctest -R tst_http_integration --output-on-failure
 //
 // Even when opted in, initTestCase() probes httpbin.org once before running any
 // test. If that probe cannot connect (DNS failure, timeout, connection refused),
-// the whole suite is skipped rather than failed, so a network blip on a nightly
-// run also shows up as SKIP, not FAIL. An unexpected HTTP status code or a bad
-// response body from a server that IS reachable is a real regression and is
-// never turned into a skip by this gate.
+// the whole suite is skipped, so a network blip on a nightly run shows up as SKIP.
+// An unexpected HTTP status code or a bad response body from a server that IS
+// reachable is a real regression and is never turned into a skip by this gate.
 //
 // Do not remove this gate to "fix" a CI failure without first confirming the
 // failure is an actual code regression rather than network noise.
@@ -36,12 +34,7 @@ static const QString BASE_URL = "https://httpbin.org";
 // timeout, with headroom. If it did not, the spy can give up while the
 // transfer is still legitimately in flight, and the test reports a bare
 // "waitForComplete returned FALSE" instead of the operation's real outcome
-// (a completed request, a genuine timeout, or an HTTP error). That exact
-// mismatch — a fixed 10s wait against tests that configure a 15s transfer
-// timeout — is what made this suite look like it was hitting flaky external
-// service timeouts, when the harness was actually giving up early. Deriving
-// the wait from the operation's own transferTimeout() keeps the two in sync
-// automatically, so the transfer timeout is always what fires first.
+// (a completed request, a genuine timeout, or an HTTP error).
 static bool waitForComplete(HttpOperation* op)
 {
     static const int WAIT_HEADROOM_MS = 5000;
@@ -64,8 +57,7 @@ private slots:
         }
 
         // Reachability probe: a connect/timeout-class failure here means the
-        // network (or httpbin.org) is unavailable, not that the code under
-        // test regressed, so skip the whole suite rather than fail it.
+        // network or httpbin.org is unavailable, so the whole suite skips.
         HttpGet probe(BASE_URL + "/get");
         probe.setVerifyPeer(false);
         probe.setTransferTimeout(TimeSpan::fromSeconds(5));
