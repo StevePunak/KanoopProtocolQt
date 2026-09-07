@@ -137,8 +137,7 @@ public:
 
     /** @brief Block until the operation finishes or the timeout elapses.
      *
-     * Warns if the Qt transfer timeout is >= the operation timeout, since
-     * that means the thread may outlive the caller and cause a crash.
+     * Warns when a non-zero timeout is passed and the transfer timeout is >= it.
      * @param timeout Maximum wait duration (zero = wait indefinitely)
      * @return true if the operation finished within the timeout */
     bool waitForCompletion(const TimeSpan& timeout = TimeSpan::zero()) override;

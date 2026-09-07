@@ -103,8 +103,7 @@ void HttpOperation::configureSsl(QNetworkRequest* request)
     if(isHttps()) {
         QSslConfiguration sslConfig = request->sslConfiguration();
         sslConfig.setPeerVerifyMode(_verifyPeer ? QSslSocket::VerifyPeer : QSslSocket::VerifyNone);
-        // Test the leaf, not the container: an empty chain and a one-element chain
-        // holding a null certificate must both fail to engage mTLS.
+        // mTLS engages only when the chain leaf and the private key are both non-null.
         if(localCertificate().isNull() == false && _privateKey.isNull() == false) {
             sslConfig.setLocalCertificateChain(_localCertificateChain);
             sslConfig.setPrivateKey(_privateKey);
@@ -147,8 +146,7 @@ void HttpOperation::threadStarted()
 
 void HttpOperation::threadFinished()
 {
-    // Clean up network objects on the correct thread (they were created
-    // in threadStarted/execute on this worker thread)
+    // Delete the network objects on the worker thread that created them.
     if(_reply != nullptr) {
         disconnect(_reply, nullptr, this, nullptr);
         _reply->abort();
