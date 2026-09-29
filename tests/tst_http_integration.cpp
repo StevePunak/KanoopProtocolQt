@@ -5,12 +5,13 @@
 
 #include <Kanoop/http/httpget.h>
 #include <Kanoop/http/httppost.h>
+#include <Kanoop/http/httppatch.h>
 #include <Kanoop/http/httpput.h>
 #include <Kanoop/http/httpdelete.h>
 #include <Kanoop/timespan.h>
 
 // This suite makes LIVE network calls to https://httpbin.org (a public third-party
-// service) to exercise HttpGet/HttpPost/HttpPut/HttpDelete end-to-end over real TLS.
+// service) to exercise HttpGet/HttpPost/HttpPut/HttpPatch/HttpDelete end-to-end over real TLS.
 // It is opt-in and gated behind KANOOP_RUN_NETWORK_TESTS so that ordinary `ctest`
 // runs (including CI) are deterministic: a flaky internet connection or httpbin.org
 // downtime must never fail a PR that has nothing to do with HTTP code.
@@ -217,6 +218,27 @@ private slots:
         QJsonObject json = QJsonDocument::fromJson(put.responseBody()).object();
         QJsonObject echoed = json["json"].toObject();
         QCOMPARE(echoed["updated"].toBool(), true);
+    }
+
+    // ---- PATCH ----
+
+    void patch_jsonBody()
+    {
+        QJsonObject payload;
+        payload["patched"] = true;
+        QByteArray body = QJsonDocument(payload).toJson(QJsonDocument::Compact);
+
+        HttpPatch patch(BASE_URL + "/patch", body);
+        patch.setVerifyPeer(false);
+        patch.setTransferTimeout(TimeSpan::fromSeconds(15));
+        patch.appendHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+        QVERIFY(waitForComplete(&patch));
+        QCOMPARE(patch.statusCode(), 200);
+
+        QJsonObject json = QJsonDocument::fromJson(patch.responseBody()).object();
+        QJsonObject echoed = json["json"].toObject();
+        QCOMPARE(echoed["patched"].toBool(), true);
     }
 
     // ---- DELETE ----

@@ -6,6 +6,7 @@
 #include <Kanoop/http/httpoperation.h>
 #include <Kanoop/http/httpget.h>
 #include <Kanoop/http/httppost.h>
+#include <Kanoop/http/httppatch.h>
 #include <Kanoop/http/httpput.h>
 #include <Kanoop/http/httpdelete.h>
 #include <Kanoop/http/httpupload.h>
@@ -289,6 +290,16 @@ private slots:
         HttpPut put("http://example.com/resource", QByteArray("data"));
         QCOMPARE(put.url(), QString("http://example.com/resource"));
         QCOMPARE(put.putBody(), QByteArray("data"));
+    }
+
+    // ---- HttpPatch construction ----
+
+    void httpPatch_urlAndBody()
+    {
+        HttpPatch patch("http://example.com/resource", QByteArray("data"));
+        QCOMPARE(patch.url(), QString("http://example.com/resource"));
+        QCOMPARE(patch.patchBody(), QByteArray("data"));
+        QCOMPARE(patch.getRequestMethodString(), QString("PATCH"));
     }
 
     // ---- HttpUpload construction ----
