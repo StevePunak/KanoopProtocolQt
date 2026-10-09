@@ -44,6 +44,7 @@ void MqttClient::start()
         _client->setUsername(_parameters.username());
         _client->setPassword(_parameters.password());
         _client->setProtocolVersion(_parameters.protocolVersion());
+        _client->setKeepAlive((quint16)_parameters.keepAlive().totalSeconds());
 
         // Set the client ID
         if(_clientId.isEmpty()) {
@@ -119,6 +120,9 @@ int MqttClient::publish(const QString& topic, const QByteArray& payload, uint8_t
 
 void MqttClient::doConnect()
 {
+    if(_client == nullptr) {
+        return;
+    }
     if(_parameters.useSsl()) {
         _client->connectToHostEncrypted(_sslConfig);
     }
@@ -137,12 +141,18 @@ void MqttClient::onClientConnected()
 
 void MqttClient::onDisconnected()
 {
-    logText(LVL_DEBUG, "Client disconnected");
+    // ⚠ Qt emits disconnected() for every failed connect attempt as well as for a lost session.
+    const bool wasConnected = _connected;
     _connected = false;
+    if(wasConnected) {
+        logText(LVL_DEBUG, "Client disconnected");
+    }
     disconnected();
     emit clientDisconnected();
     if(_autoReconnect) {
-        logText(LVL_DEBUG, QString("Client disconnected. Will reconnect in %1").arg(_autoReconnectTime.toString()));
+        if(wasConnected) {
+            logText(LVL_DEBUG, QString("Will reconnect in %1").arg(_autoReconnectTime.toString()));
+        }
         QTimer::singleShot(_autoReconnectTime.totalMilliseconds(), this, &MqttClient::doConnect);
     }
 }

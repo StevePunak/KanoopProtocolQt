@@ -3,6 +3,7 @@
 #include <QString>
 #include <QMqttClient>
 #include <QSslKey>
+#include <Kanoop/timespan.h>
 #include <Kanoop/kanoopprotocol.h>
 
 /** @brief Encapsulates connection parameters for an MQTT broker. */
@@ -59,6 +60,13 @@ public:
      * @param value The protocol version enum value. */
     void setProtocolVersion(QMqttClient::ProtocolVersion value) { _protocolVersion = value; }
 
+    /** @brief Get the interval at which the client pings an idle broker.
+     * @return The keep-alive interval. */
+    TimeSpan keepAlive() const { return _keepAlive; }
+    /** @brief Set the interval at which the client pings an idle broker.
+     * @param value The keep-alive interval, in whole seconds up to 65535. */
+    void setKeepAlive(const TimeSpan& value) { _keepAlive = value; }
+
     /** @brief Get whether SSL/TLS is enabled.
      * @return True if SSL is enabled. */
     bool useSsl() const { return _useSsl; }
@@ -110,6 +118,7 @@ private:
     QString _password;
     QString _clientId;
     QMqttClient::ProtocolVersion _protocolVersion = QMqttClient::MQTT_5_0;
+    TimeSpan _keepAlive = TimeSpan::fromSeconds(60);
     bool _useSsl = false;
     bool _verifyPeer = false;
 
