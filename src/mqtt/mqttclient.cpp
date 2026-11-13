@@ -44,7 +44,7 @@ void MqttClient::start()
         _client->setUsername(_parameters.username());
         _client->setPassword(_parameters.password());
         _client->setProtocolVersion(_parameters.protocolVersion());
-        _client->setKeepAlive((quint16)_parameters.keepAlive().totalSeconds());
+        _client->setKeepAlive((uint16_t)qBound(0.0, _parameters.keepAlive().totalSeconds(), 65535.0));
 
         // Set the client ID
         if(_clientId.isEmpty()) {

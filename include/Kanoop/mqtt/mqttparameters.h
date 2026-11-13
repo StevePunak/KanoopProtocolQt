@@ -64,7 +64,7 @@ public:
      * @return The keep-alive interval. */
     TimeSpan keepAlive() const { return _keepAlive; }
     /** @brief Set the interval at which the client pings an idle broker.
-     * @param value The keep-alive interval, in whole seconds up to 65535. */
+     * @param value The keep-alive interval in whole seconds; anything above 65535 is sent as 65535. */
     void setKeepAlive(const TimeSpan& value) { _keepAlive = value; }
 
     /** @brief Get whether SSL/TLS is enabled.
