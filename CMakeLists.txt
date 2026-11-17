@@ -4,7 +4,7 @@ include(GNUInstallDirs)
 set(PROJ KanoopProtocolQt)
 project(${PROJ})
 
-find_package(Qt6 REQUIRED COMPONENTS Network Designer)
+find_package(Qt6 REQUIRED COMPONENTS Network)
 qt_standard_project_setup()
 
 set(CMAKE_AUTOMOC ON)
